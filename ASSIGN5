@@ -1,0 +1,814 @@
+//KC03GC1A JOB ,'MYERS-ALQAISI',MSGCLASS=H                              00010000
+//*                                                                     00020000
+//************************************************************          00030000
+//*                                                          *          00040000
+//* CSCI 465/565 - FALL 2017                                 *          00050000
+//*                                                          *          00060000
+//* ASSIGNMENT 5 - COBOL                                     *          00070000
+//*                                                          *          00080000
+//* PROGRAMMERS: ZUBAIDAH ALQAISI                            *          00090000
+//*                                                          *          00100000
+//* DUE DATE: 10/23/2017                                     *          00110000
+//* DUE TIME: 11:59 PM                                       *          00120000
+//*                                                          *          00130000
+//* PROGRAM FUNCTION:                                        *          00140000
+//*                                                          *          00150000
+//* THIS PROGRAM SERVES AS AN EXPERIENCE UTILIZING COBOL     *          00160000
+//* PROGRAMMING LANGUAGE FOR CONSTRUCTING A SOLID REPORT.    *          00170000
+//* WHERE FIRST THE COBOL CODE IS ASSEMBLED, SENT TO THE     *          00180000
+//* BINDER AND THEN FETCHED AND EXECUTED.                    *          00190000
+//*                                                          *          00200000
+//************************************************************          00210000
+//*                                                                     00220000
+//************************************************************          00230000
+//*                                                          *          00240000
+//* JSTEP01 CALLS THE COBOL PROGRAM MODULE AND COMPILES      *          00250000
+//* THE COBOL SOURCE CODE INSTREAM.                          *          00260000
+//*                                                          *          00270000
+//* DDNAME               FILE DESCRIPTION                    *          00280000
+//*                                                          *          00290000
+//* SYSLIB     INPUT:  CALLS THE IBM MACRO LIBRARY           *          00300000
+//* SYSIN      INPUT:  BEGINS INSTREAM COBOL SOURCE CODE     *          00310000
+//* SYSLIN     INPUT:  A TEMPORARY DATA TO PASS TO THE       *          00320000
+//*                    BINDER IN JSTEP02                     *          00330000
+//* SYSPRINT   OUTPUT: SOURCE LISTING AND DIAGNOSTIC         *          00340000
+//*                    MESSAGES                              *          00350000
+//* SYSUT1-15  INPUT:  SCRATCH DATASET FOR COMPLING          *          00360000
+//* SYSMDECK   INPUT:  SCRATCH DATA SET REQUIRED BY COBOL    *          00370000
+//*                                                          *          00380000
+//************************************************************          00390000
+//*                                                                     00400000
+//JSTEP01  EXEC PGM=IGYCRCTL,                                           00410000
+//         REGION=0M,                                                   00420000
+//         PARM='FLAG(I,I),APOST'                                       00430000
+//*                                                                     00440000
+//SYSLIB   DD DSN=SYS1.MACLIB,                                          00450000
+//            DISP=SHR                                                  00460000
+//*                                                                     00470000
+//SYSIN    DD *                                                         00480000
+      ****************************************************************  00490000
+      *                                                              *  00500000
+      * PROGRAM NAME:  ASSIGN5                                       *  00510000
+      *                                                              *  00520000
+      * FUNCTION:  THIS PROGRAM READS INPUT DATA RECORDS AND         *  00530000
+      *            PREFORM SOME CALCULATION FOR THE TOTALS TNEN      *  00540000
+      *            WRITES THEM TO STANDARD OUTPUT.                   *  00550000
+      *                                                              *  00560000
+      * INPUT: AN INPUT RECORD THAT CONTAINS BRANCH NAME, BROKER     *  00570000
+      *        NAME, DEPOSIT AMOUNT, AND COMMISSION PERCENTAGE.      *  00580000
+      *                                                              *  00590000
+      * OUTPUT: EACH RECORD IS PRINTED TO STANDARD OUTPUT, DOUBLE    *  00600000
+      *         SPACED, AND FORMATTED WITH A FLOATING DOLLAR AMOUNT. *  00610000
+      *         THE DEPOSIT TOTALS ARE ACCUMMULATED AND PRINTED TO   *  00620000
+      *         STANDARD OUTPUT AT THE END OF THE REPORT.            *  00630000
+      *                                                              *  00640000
+      * ENTRY CONDITIONS: NONE                                       *  00650000
+      *                                                              *  00660000
+      * EXIT CONDITIONS: NONE                                        *  00670000
+      *                                                              *  00680000
+      * NOTES: NONE                                                  *  00690000
+      *                                                              *  00700000
+      ****************************************************************  00710000
+                                                                        00720000
+       IDENTIFICATION DIVISION.                                         00730000
+                                                                        00740000
+       PROGRAM-ID.    ASSIGN5.                                          00750000
+       AUTHOR.        MITCH MYERS AND ZUBAIDAH ALQAISI.                 00760000
+       DATE-WRITTEN.  10/14/2017.                                       00770000
+       DATE-COMPILED.                                                   00780000
+                                                                        00790000
+       ENVIRONMENT DIVISION.                                            00800000
+                                                                        00810000
+       INPUT-OUTPUT SECTION.                                            00820000
+                                                                        00830000
+       FILE-CONTROL.                                                    00840000
+           SELECT INPUT-FILE ASSIGN TO COBIN4.                          00850000
+           SELECT PRINT-FILE ASSIGN TO COBOUT4.                         00860000
+           SELECT TEMP-FILE  ASSIGN TO TEMPFLE.                         00870000
+                                                                        00880000
+       DATA DIVISION.                                                   00890000
+                                                                        00900000
+       FILE SECTION.                                                    00910000
+                                                                        00920000
+      ****************************************************************  00930000
+      * THE INPUT FILE IS A FILE THAT IS USED AS INPUT. THIS FILE    *  00940000
+      * CONTAINS AN UNKNOWN NUMBER OF RECORDS. EACH RECORD IN THIS   *  00950000
+      * FILE CONTAINS A BRANCH NAME, BROKER NAME, DEPOSIT AMOUNT     *  00960000
+      * AND A COMMISSION PERCENTAGE.                                 *  00970000
+      ****************************************************************  00980000
+                                                                        00990000
+       FD  INPUT-FILE                                                   01000000
+           RECORDING MODE IS F.                                         01010000
+                                                                        01020000
+       01  INPUT-RECORD                    PIC X(80).                   01030000
+                                                                        01040000
+      ****************************************************************  01050000
+      * PRINT FILE CONTAINS A GENERIC PRINT LINE THAT IS USED TO     *  01060000
+      * PRINT EACH LINE OF THE RECORD.                               *  01070000
+      ****************************************************************  01080000
+                                                                        01090000
+       FD  PRINT-FILE                                                   01100000
+           RECORDING MODE IS F.                                         01110000
+                                                                        01120000
+       01  PRINT-RECORD                    PIC X(132).                  01130000
+                                                                        01140000
+      ***************************************************************   01150000
+      * TEMP FILE: IS A TEMPORARY FILE THAT HOLDS THE HIGHEST SHARES*   01160000
+      *            SOLD AND THE NAME OF DEPOSITORS WHO OWN THE      *   01170000
+      *            HIGHEST SHARES SOLD. ALSO IT HOLDS THE NUMBER OF *   01171000
+      *            RECORDS, NUMBER OF BROKERS PROCESSED, AND TOTAL  *   01172000
+      *            NUMBER OF SHARES.                                *   01173000
+      ***************************************************************   01180000
+       FD  TEMP-FILE                                                    01190000
+           RECORDING MODE IS F.                                         01200000
+                                                                        01210000
+       01  TEMP-RECORD.                                                 01220000
+           05  TEMP-BROKER-NAME            PIC X(25).                   01230000
+           05  TEMP-SHR-AMT                PIC S9(13)V9(3)              01240000
+                                           PACKED-DECIMAL.              01250000
+                                                                        01260000
+       WORKING-STORAGE SECTION.                                         01270000
+                                                                        01280000
+      ****************************************************************  01290000
+      * VARIABLES:                                                   *  01300000
+      *                                                              *  01310000
+      * EOF-FLAG        CHANGED TO 'Y' WHEN END OF FILE OCCURS.      *  01320000
+      *                                                              *  01331000
+      * LINE-COUNT      STORES NUMBER OF LINES PER PAGE '15 DETAIL   *  01332000
+      *                 LINES PER PAGE' AS A BINARY SYNC VALUE.      *  01333000
+      * PAGE-COUNT      COUNTING PAGES PER REPORT.                   *  01334000
+      *                                                              *  01335000
+      * SALES-COUNT     COUNTING NUMBER OF SALES PROCESSED IN THE    *  01336000
+      *                 INPUT FILE.                                  *  01337000
+      * HIGH-SHR-COUNT  STORES THE NUMBER OF HIGH SHARES SOLD AS     *  01338000
+      *                 PACKED DECIMAL FIELD.                        *  01339000
+      * I-SHR-AMT       5 BYTES ZONED DECIMAL TO HOLD THE PRICE PER  *  01339100
+      *                 SHARE.                                       *  01339200
+      * I-FUND-NME      THE MUTUAL FUND NAME LISTED IN THE RECORD    *  01339300
+      *                                                              *  01339400
+      * I-COM-1         6 BYTES ZONED DECIMAL FOR COMMESSION PERCENT1*  01339500
+      *                                                              *  01339600
+      * I-COM-2         6 BYTES ZONED DECIMAL TO HOLD THE COMMISSION *  01339700
+      *                 PERCENT 2.                                   *  01339800
+      * I-COM-3         6 BYTES ZONED DECIMAL TO HOLD THE COMMISSION *  01339900
+      *                 PERCENT 3.                                   *  01340000
+      * I-BRANCH-NME    THE BRANCH NAME LISTED IN THE RECORD.        *  01341000
+      *                                                              *  01350000
+      * I-BROKER-NME   THE BROKER NAME LISTED IN THE RECORD.         *  01360000
+      *                                                              *  01370000
+      * I-DEP-AMT       THE DEPOSIT AMOUNT LISTED IN THE RECORD.     *  01380000
+      *                                                              *  01390000
+      * I-COMM-FLAG     THE COMMISSION PERCENTED LISTED IN THE       *  01400000
+      *                 RECORD.                                      *  01410000
+      * O-BRANCH-NME    THE BRANCH NAME WRITTIN TO OUTPUT.           *  01446000
+      *                                                              *  01447000
+      * O-BROKER-NME    THE BROKER NAME WRITTEN TO OUTPUT.           *  01450000
+      *                                                              *  01460000
+      * O-DEP-AMT       THE DEPOSIT AMOUNT ZONED DECIMAL, FORMATTED  *  01470000
+      *                 TO DISPLAY IN A FLOATING DOLLAR SIGN FORMAT  *  01480000
+      *                 WRITTEN TO OUTPUT.                           *  01490000
+      * O-SHR-SOLD      THE AMOUNT OF SHARE SOLD PER BROKER WRITTEN  *  01500000
+      *                 TO OUTPUT.                                   *  01501000
+      *                                                              *  01502000
+      * O-COM-AMT       THE COMMISSION AMOUNT EACH BROKER GET PAID   *  01510000
+      *                 WRITTEN TO OUTPUT.                           *  01520000
+      * O-SALES-BROKER-NAME THE BROKER NAME THAT OWN THE HIGH SHARE  *  01522000
+      *                  SOLD WRITTIN TO OUTPUT.                     *  01523000
+      * O-SALES-SHR-AMT THE HIGH SHARE SOLD AMOUNT WRITTIN TO OUTPUT *  01524000
+      *                                                              *  01525000
+      * TOTAL-DEP-AMT   STORES THE TOTAL ACCUMMULATED VALUE OF THE   *  01530000
+      *                 DEPOSIT AMOUNTS FROM THE INPUT RECORD AS A   *  01540000
+      *                 ZONED DECIMAL.                               *  01550000
+      * SHR-SOLD-AMT    STORES THE AMOUNT OF SHARES SOLD PER BROKER  *  01551000
+      *                 AS PACKED DECIMAL.                           *  01552000
+      * COM-AMT         STORES THE COMMISSION PAID AMOUNT FOR EACH   *  01553000
+      *                 BROKER AS PACKED DECIMAL.                    *  01554000
+      * TOTAL-SHR-SOLD  STORES THE TOTAL ACCUMULATED VALUE OF THE    *  01555000
+      *                 SHARE SOLD FOR ALL BROKERS AS PACKED DECIMAL *  01556000
+      * TOTAL-COM-PAID  STORES THE TOTAL ACCUMULATED VALUE OF THE    *  01557000
+      *                 COMMISSIONS PAID FOR ALL BROKERS AS PACKED   *  01560000
+      *                 DECIMAL.                                     *  01561000
+      * HIGH-S-TOTAL    STORES THE TOTAL ACCUMULATED VALUE OF THE    *  01562000
+      *                 HIGH SHARES SOLD AMOUNT AS PACKED DECIMAL.   *  01563000
+      *                                                              *  01564000
+      * O-HIGH-SHR-COUNT THE NUMBER OF HIGH SHARE SOLD WRITTEN TO    *  01565000
+      *                 OUTPUT.                                      *  01566000
+      * O-HIGH-SHR-TOTAL WRITES THE TOTAL ACCUMULATED HIGH SHARES    *  01591000
+      *                 SOLD TO OUTPUT.                              *  01592000
+      * O-SALES-COUNT   WRITES THE NUMBER OF HIGH SHARE SOLD TO      *  01597000
+      *                 OUTPUT.                                      *  01598000
+      * O-TOTAL-DEP-AMT WRITES THE TOTAL ACCUMMULATED DEPOSIT TOTAL  *  01599000
+      *                 TO OUTPUT IN A FLOATING DOLLAR SIGN FORMAT.  *  01599100
+      *                                                              *  01599200
+      * O-TOTAL-SHR-SOLD WRITES THE TOTAL ACCUMULATED VALUE OF THE   *  01599400
+      *                  SHARES SOLD AMOUNT FOR ALL BROKERS TO OUTPUT*  01599500
+      *                                                              *  01599600
+      * O-TOTAL-COM-PAID WRITE THE TOTAL ACCUMULATED AMOUNT VALUE OF *  01599700
+      *                  THE COMMISSION AMOUNT PAID FOR ALL BROKERS  *  01599800
+      *                  TO OUTPUT.                                  *  01599900
+      * CURRENT-MONTH    STORES THE CURRENT MONTH VALUE IN 2 BYTES.  *  01600000
+      *                                                              *  01600100
+      * CURRENT-DAY      STORES THE CURRENT DAY VALUE IN 2 BYTES.    *  01600200
+      *                                                              *  01600300
+      * CURRENT-YEAR     STORES THE CURRENT YEAR VALUE IN 4 BYTES.   *  01600400
+      *                                                              *  01600500
+      * O-FUND-NAME      WRITE THE MUTUAL FUN NAME TO OUTPUT.        *  01600600
+      *                                                              *  01600700
+      * O-PAGE-COUNT     WRITE PAGE NUMBER PER RECORD TO OUTPUT.     *  01600800
+      *                                                              *  01600900
+      * CURRENT-HOUR    STORES THE CURRENT HOUR VALUE IN 2 BYTES.    *  01601000
+      *                                                              *  01601100
+      * CURRENT-MINUTE  STORES THE CURRENT MINUTE VALUE IN 2 BYTES.  *  01601200
+      *                                                              *  01601300
+      * CURRENT-SECOND  STORES THE CURRENT SECONDS VALUE IN 2 BYTES. *  01601400
+      *                                                              *  01601500
+      * O-SHR-AMT       WRITES THE CURRENT SHARE PRICE AMOUNT TO     *  01601600
+      *                 OUTPUT.                                      *  01601700
+      ****************************************************************  01602000
+                                                                        01610000
+       01  FLAGS.                                                       01620000
+           05  EOF-FLAG                    PIC X VALUE 'N'.             01630000
+                                                                        01640000
+       01  COUNTERS.                                                    01650000
+           05  LINE-COUNT                  PIC S9(2)  BINARY SYNC       01660000
+                                                      VALUE 99.         01670000
+           05  PAGE-COUNT                  PIC S9(3)                    01680000
+                                           PACKED-DECIMAL VALUE 0.      01690000
+           05  SALES-COUNT                 PIC S9(3)                    01700000
+                                           PACKED-DECIMAL VALUE 0.      01710000
+                                                                        01720000
+           05  HIGH-SHR-COUNT              PIC S9(3)                    01721000
+                                           PACKED-DECIMAL VALUE 0.      01722000
+       01  SHR-RECORD.                                                  01730000
+           05  I-SHR-AMT                   PIC S9(3)V99.                01740000
+           05  I-FUND-NME                  PIC X(25).                   01750000
+           05  I-COM-1                     PIC S9(1)V9(5).              01760000
+           05  I-COM-2                     PIC S9(1)V9(5).              01770000
+           05  I-COM-3                     PIC S9(1)V9(5).              01780000
+           05  FILLER                      PIC X(32).                   01790000
+                                                                        01800000
+       01  DEP-RECORD.                                                  01810000
+           05  I-BRANCH-NME                PIC X(25).                   01820000
+           05  I-BROKER-NME                PIC X(25).                   01830000
+           05  I-DEP-AMT                   PIC S9(11)V99.               01840000
+           05  I-COMM-FLAG                 PIC 9.                       01860000
+           05  FILLER                      PIC X(8)   VALUE SPACES.     01870000
+                                                                        01880000
+       01  BROKER-DET1.                                                 01890000
+           05  O-BRANCH-NME                PIC X(25).                   01900000
+           05  FILLER                      PIC X(5)   VALUE SPACES.     01910000
+           05  O-BROKER-NME                PIC X(25).                   01920000
+           05  FILLER                      PIC X(8)   VALUE SPACES.     01930000
+           05  O-DEP-AMT                   PIC $$,$$$,$$$,$$9.99.       01940000
+           05  FILLER                      PIC X(10)  VALUE SPACES.     01950000
+           05  O-SHR-SOLD                  PIC Z,ZZZ,ZZZ,ZZZ,ZZ9.9999.  01960000
+           05  FILLER                      PIC X(2)   VALUE SPACES.     01970000
+           05  O-COM-AMT                   PIC $$$,$$$,$$$,$$9.99.      01980000
+                                                                        01990000
+       01  O-HIGH-SHR-REC.                                              02000000
+           05  FILLER                      PIC X(23)  VALUE SPACES.     02001000
+           05  O-SALES-BROKER-NAME         PIC X(25).                   02010000
+           05  FILLER                      PIC X(12)  VALUE SPACES.     02011000
+           05  O-SALES-SHR-AMT             PIC Z,ZZZ,ZZZ,ZZZ,ZZ9.9999.  02020000
+           05  FILLER                      PIC X(50)  VALUE SPACES.     02021000
+                                                                        02030000
+       01  TOTALS.                                                      02040000
+           05  TOTAL-DEP-AMT               PIC S9(12)V99                02050000
+                                           PACKED-DECIMAL VALUE 0.      02060000
+           05  SHR-SOLD-AMT                PIC S9(13)V9(3)              02070000
+                                           PACKED-DECIMAL VALUE 0.      02080000
+           05  COM-AMT                     PIC S9(12)V99                02090000
+                                           PACKED-DECIMAL VALUE 0.      02100000
+           05  TOTAL-SHR-SOLD              PIC S9(14)V9(3)              02110000
+                                           PACKED-DECIMAL VALUE 0.      02120000
+           05  TOTAL-COM-PAID              PIC S9(15)V9(2)              02130000
+                                           PACKED-DECIMAL VALUE 0.      02140000
+       01  HIGH-SHR-TOTAL.                                              02141000
+           05  HIGH-S-TOTAL                PIC S9(14)V9(3)              02142000
+                                           PACKED-DECIMAL VALUE 0.      02150000
+       01  O-HIGH-SHR-SOLD.                                             02151000
+           05  FILLER                      PIC X(47)  VALUE SPACES.     02151100
+           05  O-HIGH-SHR-COUNT            PIC ZZ9.                     02151200
+           05  FILLER                      PIC X(10)  VALUE SPACES.     02151300
+           05  O-HIGH-SHR-TOTAL            PIC ZZ,ZZZ,ZZZ,ZZZ,ZZ9.9999. 02152000
+           05  FILLER                      PIC X(49)  VALUE SPACES.     02153000
+                                                                        02154000
+       01  O-TOTALS.                                                    02160000
+           05  FILLER                      PIC X(12)  VALUE SPACES.     02161000
+           05  O-SALES-COUNT               PIC ZZ9.                     02170000
+           05  FILLER                      PIC X(10)  VALUE SPACES.     02180000
+           05  O-TOTAL-DEP-AMT             PIC $$$,$$$,$$$,$$9.99.      02190000
+           05  FILLER                      PIC X(5)   VALUE SPACES.     02200000
+           05  O-TOTAL-SHR-SOLD            PIC                          02210000
+                                           ZZ,ZZZ,ZZZ,ZZZ,ZZ9.9999.     02220000
+           05  FILLER                      PIC X(13)   VALUE SPACES.    02230000
+           05  O-TOTAL-COM-PAID            PIC                          02240000
+                                           $$$,$$$,$$$,$$$,$$9.99.      02250000
+           05  FILLER                      PIC X(26)  VALUE SPACES.     02260000
+                                                                        02270000
+       01  HEADER-1.                                                    02280000
+           05  CURRENT-MONTH               PIC 9(2).                    02290000
+           05  FILLER                      PIC X      VALUE '/'.        02300000
+           05  CURRENT-DAY                 PIC 9(2).                    02310000
+           05  FILLER                      PIC X      VALUE '/'.        02320000
+           05  CURRENT-YEAR                PIC 9(4).                    02330000
+           05  FILLER                      PIC X(30)  VALUE SPACES.     02340000
+           05  O-FUND-NME                  PIC X(25).                   02350000
+           05  FILLER                      PIC X(44)  VALUE SPACES.     02360000
+           05  FILLER                      PIC X(6)   VALUE 'PAGE: '.   02370000
+           05  O-PAGE-COUNT                PIC ZZ9.                     02380000
+           05  FILLER                      PIC X(14)  VALUE SPACES.     02390000
+                                                                        02400000
+       01  HEADER-2.                                                    02410000
+           05  CURRENT-HOUR                PIC 9(2).                    02420000
+           05  FILLER                      PIC X      VALUE ':'.        02430000
+           05  CURRENT-MINUTE              PIC 9(2).                    02440000
+           05  FILLER                      PIC X      VALUE ':'.        02450000
+           05  CURRENT-SECOND              PIC 9(2).                    02460000
+           05  FILLER                      PIC X(27)  VALUE SPACES.     02470000
+           05  FILLER                      PIC X(36)                    02480000
+                       VALUE 'BROKER SALES AND COMMISSIONS REPORT'.     02490000
+           05  FILLER                      PIC X(61)  VALUE SPACES.     02500000
+                                                                        02510000
+       01  HEADER-3.                                                    02520000
+           05  FILLER                      PIC X(38)   VALUE SPACES.    02530000
+           05  FILLER                      PIC X(21)                    02540000
+                                       VALUE 'CURRENT SHARE PRICE:'.    02550000
+           05  O-SHR-AMT                   PIC $$$$.$$.                 02560000
+           05  FILLER                      PIC X(66).                   02570000
+                                                                        02580000
+       01  COLUMN-HDR.                                                  02590000
+           05  FILLER                      PIC X(11)                    02600000
+                                           VALUE 'BRANCH NAME'.         02610000
+           05  FILLER                      PIC X(19)  VALUE SPACES.     02620000
+           05  FILTER                      PIC X(11)                    02630000
+                                           VALUE 'BROKER NAME'.         02640000
+           05  FILLER                      PIC X(24)  VALUE SPACES.     02650000
+           05  FILLER                      PIC X(14)                    02660000
+                                           VALUE 'DEPOSIT AMOUNT'.      02670000
+           05  FILLER                      PIC X(23)  VALUE SPACES.     02680000
+           05  FILLER                      PIC X(10)                    02690000
+                                           VALUE 'SHARE SOLD'.          02700000
+           05  FILLER                      PIC X(9)  VALUE SPACES.      02710000
+           05  FILLER                      PIC X(11)                    02720000
+                                           VALUE 'COMMISSION'.          02730000
+       01  HYPHEN-HDR.                                                  02750000
+           05  FILLER                      PIC X(25)  VALUE ALL '-'.    02760000
+           05  FILLER                      PIC X(4)   VALUE SPACES.     02770000
+           05  FILLER                      PIC X(25)  VALUE ALL '-'.    02780000
+           05  FILLER                      PIC X(8)   VALUE SPACES.     02790000
+           05  FILLER                      PIC X(18)  VALUE ALL '-'.    02800000
+           05  FILLER                      PIC X(17)  VALUE SPACES.     02810000
+           05  FILLER                      PIC X(15)  VALUE ALL '-'.    02820000
+           05  FILLER                      PIC X(6)   VALUE SPACES.     02830000
+           05  FILLER                      PIC X(14)  VALUE ALL '-'.    02840000
+                                                                        02850000
+       01 HEADER-PART-2.                                                02860000
+           05  CURRENT-HOUR                PIC 9(2).                    02870000
+           05  FILLER                      PIC X      VALUE ':'.        02880000
+           05  CURRENT-MINUTE              PIC 9(2).                    02890000
+           05  FILLER                      PIC X      VALUE ':'.        02900000
+           05  CURRENT-SECOND              PIC 9(2).                    02910000
+           05  FILLER                      PIC X(24)  VALUE SPACES.     02920000
+           05  FILLER                      PIC X(44)                    02930000
+               VALUE 'BROKER SALES AND COMMISSIONS REPORT TOTALS'.      02940000
+           05  FILLER                      PIC X(56)  VALUE SPACES.     02950000
+                                                                        02960000
+       01 HEADER-PART-2-2.                                              02960100
+           05  CURRENT-HOUR                PIC 9(2).                    02961000
+           05  FILLER                      PIC X      VALUE ':'.        02962000
+           05  CURRENT-MINUTE              PIC 9(2).                    02963000
+           05  FILLER                      PIC X      VALUE ':'.        02964000
+           05  CURRENT-SECOND              PIC 9(2).                    02965000
+           05  FILLER                      PIC X(29)  VALUE SPACES.     02966000
+           05  FILLER                      PIC X(31)                    02967000
+                           VALUE 'BROKER LARGE SALES REPORT TOTAL'.     02968000
+           05  FILLER                      PIC X(46)  VALUE SPACES.     02969000
+                                                                        02969100
+       01 HDR-2.                                                        02970000
+           05  FILLER                      PIC X(15)                    02980000
+                                           VALUE 'NUMBER OF SALES'.     02990000
+           05  FILLER                      PIC X(7)   VALUE SPACES.     03000000
+           05  FILLER                      PIC X(20)                    03010000
+                                     VALUE 'TOTAL DEPOSIT AMOUNT'.      03020000
+           05  FILLER                      PIC X(13)  VALUE SPACES.     03030000
+           05  FILLER                      PIC X(16)                    03040000
+                                          VALUE 'TOTAL SHARE SOLD'.     03050000
+           05  FILLER                      PIC X(14)  VALUE SPACES.     03060000
+           05  FILLER                      PIC X(21)                    03070000
+                                     VALUE 'TOTAL COMMISSION PAID'.     03080000
+           05 FILLER                       PIC X(26)  VALUE SPACES.     03090000
+                                                                        03100000
+       01 HYPHEN-HDR-2.                                                 03110000
+          05  FILLER                       PIC X(15)  VALUE ALL '-'.    03120000
+          05  FILLER                       PIC X(7)   VALUE SPACES.     03130000
+          05  FILLER                       PIC X(21)  VALUE ALL '-'.    03140000
+          05  FILLER                       PIC X(12)  VALUE SPACES.     03150000
+          05  FILLER                       PIC X(16)  VALUE ALL '-'.    03160000
+          05  FILLER                       PIC X(14)  VALUE SPACES.     03170000
+          05  FILLER                       PIC X(21)  VALUE ALL '-'.    03180000
+          05  FILLER                       PIC X(26)  VALUE SPACES.     03190000
+                                                                        03200000
+       01 REP-2-HDR.                                                    03201000
+          05  CURRENT-HOUR                PIC 9(2).                     03202000
+          05  FILLER                      PIC X      VALUE ':'.         03203000
+          05  CURRENT-MINUTE              PIC 9(2).                     03204000
+          05  FILLER                      PIC X      VALUE ':'.         03205000
+          05  CURRENT-SECOND              PIC 9(2).                     03206000
+          05  FILLER                      PIC X(29)  VALUE SPACES.      03207000
+          05  FILLER                      PIC X(32)                     03208000
+                          VALUE 'BROKER LARGE SHARE SALES REPORT'.      03209000
+          05  FILLER                      PIC X(63)  VALUE SPACES.      03209100
+                                                                        03209200
+       01 COLUMN-HDR-2.                                                 03209300
+          05  FILLER                      PIC X(23)  VALUE SPACES.      03209400
+          05  FILLER                      PIC X(12)                     03209500
+                                          VALUE 'BROKER NAME'.          03209600
+          05  FILLER                      PIC X(36)  VALUE SPACES.      03209700
+          05  FILLER                      PIC X(12)                     03209800
+                                          VALUE 'SHARES SOLD'.          03209900
+          05  FILLER                      PIC X(49).                    03210000
+                                                                        03210100
+       01 HYPHEN-HDR-REP-2.                                             03210200
+          05  FILLER                      PIC X(23)  VALUE SPACES.      03210300
+          05  FILLER                      PIC X(25)  VALUE ALL '-'.     03210400
+          05  FILLER                      PIC X(18)  VALUE SPACES.      03210500
+          05  FILLER                      PIC X(16)  VALUE ALL '-'.     03210600
+          05  FILLER                      PIC X(50)  VALUE SPACES.      03210700
+                                                                        03210800
+       01 COLUMN-HDR-2-2.                                               03210900
+           05  FILLER                      PIC X(24)  VALUE SPACES.     03211000
+           05  FILLER                      PIC X(26)                    03211100
+                                VALUE 'NUMBER OF LARGE DEPOSITORS'.     03211200
+           05  FILLER                      PIC X(17)  VALUE SPACES.     03211300
+           05  FILLER                      PIC X(16)                    03211400
+                                          VALUE 'TOTAL SHARE SOLD'.     03211500
+           05  FILLER                      PIC X(49).                   03211600
+                                                                        03211700
+       01 HYPHEN-HDR-PART-2-2.                                          03211800
+          05  FILLER                       PIC X(24)  VALUE SPACES.     03211900
+          05  FILLER                       PIC X(26)  VALUE ALL '-'.    03212000
+          05  FILLER                       PIC X(17)  VALUE SPACES.     03212100
+          05  FILLER                       PIC X(16)  VALUE ALL '-'.    03212200
+          05  FILLER                       PIC X(49)  VALUE SPACES.     03212300
+                                                                        03212400
+       01 CURRENT-DATE-FIELDS.                                          03213000
+           05 CURRENT-DATE.                                             03220000
+              10 CURRENT-YEAR              PIC 9(4).                    03230000
+              10 CURRENT-MONTH             PIC 9(2).                    03240000
+              10 CURRENT-DAY               PIC 9(2).                    03250000
+           05 CURRENT-TIME.                                             03260000
+              10 CURRENT-HOUR              PIC 9(2).                    03270000
+              10 CURRENT-MINUTE            PIC 9(2).                    03280000
+              10 CURRENT-SECOND            PIC 9(2).                    03290000
+              10 CURRENT-MS                PIC 9(2).                    03300000
+           05 DIFF-FROM-GMT                PIC S9(4).                   03310000
+                                                                        03320000
+       PROCEDURE DIVISION.                                              03330000
+                                                                        03340000
+      ****************************************************************  03350000
+      * 0000-MAIN. THIS ROUTINE CONTROLS THE FLOW OF THE PROGRAM.    *  03360000
+      * IT FIRST OPENS THE INPUT FILE, DOES AN INITIAL PRIMING       *  03370000
+      * READ TO SKIP OVER THE FIRST RECORD, READS THE INPUT FILE,    *  03380000
+      * WRITES THE RECORDS, MOVE THE DATE AND TIME TO THE FORMATTED  *  03390000
+      * OUTPUT RECORDS, AND CLOSES THE INPUT AND PRINT FILES.        *  03400000
+      ****************************************************************  03410000
+                                                                        03420000
+       0000-MAIN.                                                       03430000
+                                                                        03440000
+           MOVE FUNCTION CURRENT-DATE TO CURRENT-DATE-FIELDS.           03450000
+                                                                        03460000
+           MOVE CORRESPONDING CURRENT-DATE TO HEADER-1.                 03470000
+                                                                        03480000
+           MOVE CORRESPONDING CURRENT-TIME TO HEADER-2.                 03490000
+                                                                        03500000
+           MOVE CORRESPONDING CURRENT-TIME TO HEADER-PART-2.            03510000
+                                                                        03520000
+           MOVE CORRESPONDING CURRENT-TIME TO REP-2-HDR.                03521000
+                                                                        03522000
+           MOVE CORRESPONDING CURRENT-TIME TO HEADER-PART-2-2.          03523000
+                                                                        03524000
+           OPEN INPUT INPUT-FILE                                        03530000
+                OUTPUT TEMP-FILE                                        03540000
+                OUTPUT PRINT-FILE.                                      03550000
+                                                                        03560000
+           READ INPUT-FILE INTO SHR-RECORD                              03570000
+             AT END MOVE 'Y' TO EOF-FLAG                                03580000
+           END-READ.                                                    03590000
+                                                                        03600000
+           MOVE I-FUND-NME TO O-FUND-NME.                               03610000
+                                                                        03620000
+           MOVE I-SHR-AMT TO O-SHR-AMT.                                 03621000
+                                                                        03622000
+           READ INPUT-FILE INTO DEP-RECORD                              03630000
+             AT END MOVE 'Y' TO EOF-FLAG                                03640000
+           END-READ.                                                    03650000
+                                                                        03660000
+           PERFORM 1000-PROCESS-DEPOSITS                                03670000
+             UNTIL EOF-FLAG = 'Y'.                                      03680000
+                                                                        03690000
+           PERFORM 2000-WRITE-TOTAL.                                    03700000
+                                                                        03710000
+           CLOSE INPUT-FILE                                             03720000
+                 TEMP-FILE.                                             03730000
+                                                                        03740000
+           MOVE 'N' TO EOF-FLAG.                                        03750000
+           MOVE 99 TO LINE-COUNT.                                       03760000
+           MOVE 0 TO PAGE-COUNT.                                        03770000
+                                                                        03780000
+           OPEN INPUT TEMP-FILE.                                        03790000
+                                                                        03800000
+           READ TEMP-FILE                                               03810000
+             AT END MOVE 'Y' TO EOF-FLAG                                03820000
+           END-READ.                                                    03830000
+                                                                        03842000
+           PERFORM 3000-PROCESS-HIGH-SALES                              03850000
+             UNTIL EOF-FLAG = 'Y'.                                      03860000
+                                                                        03870000
+           PERFORM 4000-HIGH-SALES-TOTALS.                              03880000
+                                                                        03890000
+           CLOSE TEMP-FILE                                              03900000
+                 PRINT-FILE.                                            03910000
+                                                                        03920000
+           GOBACK.                                                      03930000
+                                                                        03940000
+       0000-EXIT. EXIT.                                                 03950000
+                                                                        03960000
+      ****************************************************************  03970000
+      * 1000-PROCESS-DEPOSITS THIS ROUTINE MOVES THE INPUT RECORD TO *  03980000
+      * THE FORMATTED OUTPUT RECORD, COMPUTES A RUNNING TOTAL OF     *  03990000
+      * THE DEPOSIT AMOUNT, SAHRE SOLD AMOUNT, TOTAL SHRE SOLD AMOUNT*  03991000
+      * TOTAL COMMISSION AMOUNT, WRITES THE FORMATTED OUTPUT TO THE  *  04000000
+      * PRINT RECORD, AND MOVES TO THE NEXT RECORD.                  *  04010000
+      ****************************************************************  04020000
+                                                                        04030000
+       1000-PROCESS-DEPOSITS.                                           04040000
+                                                                        04050000
+           MOVE I-BRANCH-NME TO O-BRANCH-NME.                           04060000
+           MOVE I-BROKER-NME TO O-BROKER-NME.                           04070000
+           MOVE I-DEP-AMT TO O-DEP-AMT.                                 04080000
+                                                                        04090000
+           COMPUTE TOTAL-DEP-AMT ROUNDED =                              04110000
+                   TOTAL-DEP-AMT + I-DEP-AMT.                           04120000
+                                                                        04160000
+           COMPUTE SHR-SOLD-AMT ROUNDED =                               04170000
+                   I-DEP-AMT / I-SHR-AMT.                               04180000
+                                                                        04181000
+           COMPUTE TOTAL-SHR-SOLD ROUNDED =                             04182000
+                   TOTAL-SHR-SOLD + SHR-SOLD-AMT.                       04183000
+                                                                        04190000
+           IF SHR-SOLD-AMT > 250000.000                                 04191000
+              MOVE I-BROKER-NME TO TEMP-BROKER-NAME                     04192000
+              MOVE SHR-SOLD-AMT TO TEMP-SHR-AMT                         04193000
+              WRITE TEMP-RECORD                                         04194000
+           END-IF.                                                      04195000
+                                                                        04196000
+           COMPUTE TOTAL-COM-PAID ROUNDED =                             04200000
+                   TOTAL-COM-PAID + COM-AMT.                            04210000
+                                                                        04220000
+           ADD 1 TO SALES-COUNT.                                        04230000
+                                                                        04240000
+           MOVE SHR-SOLD-AMT TO O-SHR-SOLD.                             04250000
+                                                                        04260000
+           IF I-COMM-FLAG IS = 1                                        04270000
+              COMPUTE COM-AMT ROUNDED =                                 04280000
+                    I-COM-1 * I-DEP-AMT                                 04290000
+                                                                        04300000
+           ELSE IF I-COMM-FLAG IS = 2                                   04310000
+              COMPUTE COM-AMT ROUNDED =                                 04320000
+                    I-COM-2 * I-DEP-AMT                                 04330000
+                                                                        04340000
+           ELSE IF I-COMM-FLAG IS = 3                                   04350000
+              COMPUTE COM-AMT ROUNDED =                                 04360000
+                    I-COM-3 * I-DEP-AMT                                 04370000
+           END-IF.                                                      04380000
+                                                                        04390000
+           MOVE COM-AMT TO O-COM-AMT.                                   04400000
+                                                                        04410000
+           IF LINE-COUNT > 15                                           04420000
+              PERFORM 1100-PRINT-HDRS.                                  04430000
+                                                                        04440000
+           WRITE PRINT-RECORD FROM BROKER-DET1 AFTER 2.                 04450000
+                                                                        04451000
+           ADD 1 TO LINE-COUNT.                                         04460000
+                                                                        04470000
+           READ INPUT-FILE INTO DEP-RECORD                              04480000
+             AT END MOVE 'Y' TO EOF-FLAG                                04490000
+           END-READ.                                                    04500000
+                                                                        04510000
+       1000-EXIT. EXIT.                                                 04520000
+                                                                        04530000
+      ****************************************************************  04531000
+      * 1100-PRINT-HDRS PROCESS PAGE NUMBER FOR RECORD ONE, MOVES IT *  04532000
+      * TO FORMATTED OUTPUT RECORD, AND PRINT THE REPORT HEADERS TO  *  04533000
+      * OUTPUT.                                                      *  04534000
+      ****************************************************************  04535000
+                                                                        04536000
+       1100-PRINT-HDRS.                                                 04540000
+                                                                        04550000
+           ADD 1 TO PAGE-COUNT.                                         04560000
+                                                                        04570000
+           MOVE PAGE-COUNT TO O-PAGE-COUNT.                             04580000
+                                                                        04590000
+           WRITE PRINT-RECORD FROM HEADER-1 AFTER PAGE.                 04600000
+                                                                        04610000
+           WRITE PRINT-RECORD FROM HEADER-2 AFTER 1.                    04620000
+           WRITE PRINT-RECORD FROM HEADER-3 AFTER 2.                    04630000
+           WRITE PRINT-RECORD FROM COLUMN-HDR AFTER 2.                  04640000
+           WRITE PRINT-RECORD FROM HYPHEN-HDR AFTER 2.                  04650000
+                                                                        04660000
+           MOVE 0 TO LINE-COUNT.                                        04670000
+                                                                        04680000
+       1100-EXIT. EXIT.                                                 04690000
+                                                                        04691000
+      ****************************************************************  04700000
+      * 2000-WRITE-TOTAL THIS ROUTINE MOVES THE ACCUMMULATED         *  04710000
+      * RUNNING TOTAL DEPOSITE, TOTAL SHARE SOLD, TOTAL COMMISSION   *  04720000
+      * PAID, AND NUMBER OF SALES TO FORMATTED OUTPUT FIELDS, THEN   *  04721000
+      * PRINT THE ACCUMMULATED TOTAL TO OUTPUT. IT ALSO PRINTS       *  04722000
+      * ONE PART 2 HEADERS AND COLUMNS HEADERS.                      *  04730000
+      ****************************************************************  04740000
+                                                                        04750000
+       2000-WRITE-TOTAL.                                                04760000
+                                                                        04770000
+           ADD 1 TO PAGE-COUNT.                                         04771000
+           MOVE PAGE-COUNT TO O-PAGE-COUNT.                             04771100
+                                                                        04772000
+           WRITE PRINT-RECORD FROM HEADER-1 AFTER PAGE.                 04780000
+           WRITE PRINT-RECORD FROM HEADER-PART-2 AFTER 1.               04790000
+           WRITE PRINT-RECORD FROM HEADER-3 AFTER 2.                    04800000
+           WRITE PRINT-RECORD FROM HDR-2 AFTER 2.                       04810000
+           WRITE PRINT-RECORD FROM HYPHEN-HDR-2 AFTER 2.                04820000
+                                                                        04830000
+           MOVE TOTAL-DEP-AMT TO O-TOTAL-DEP-AMT.                       04840000
+           MOVE TOTAL-SHR-SOLD TO O-TOTAL-SHR-SOLD.                     04850000
+           MOVE TOTAL-COM-PAID TO O-TOTAL-COM-PAID.                     04860000
+           MOVE SALES-COUNT TO O-SALES-COUNT.                           04870000
+                                                                        04880000
+           WRITE PRINT-RECORD FROM O-TOTALS AFTER 2.                    04890000
+                                                                        04900000
+       2000-EXIT. EXIT.                                                 04910000
+                                                                        04920000
+      ****************************************************************  04921000
+      * 3000-PROCESS-HIGH-SALES THIS ROUTINE MOVES THE BROKERS NAME  *  04922000
+      * AND THIER HIGH SHARES SOLD TO A TEMPORARY FIELDS, THEN PRINT *  04923000
+      * THEM TO OUTPUT.                                              *  04924000
+      ****************************************************************  04925000
+                                                                        04926000
+       3000-PROCESS-HIGH-SALES.                                         04930000
+                                                                        04940100
+           IF LINE-COUNT > 15                                           04940200
+             PERFORM 3100-PRINT-HEADER-2.                               04940300
+                                                                        04940400
+           MOVE TEMP-BROKER-NAME TO O-SALES-BROKER-NAME.                04941000
+           MOVE TEMP-SHR-AMT TO O-SALES-SHR-AMT.                        04942000
+                                                                        04942100
+           WRITE PRINT-RECORD FROM O-HIGH-SHR-REC AFTER 2.              04943000
+                                                                        04944000
+           ADD 1 TO HIGH-SHR-COUNT.                                     04945000
+                                                                        04946000
+           ADD 1 TO LINE-COUNT.                                         04946100
+                                                                        04946200
+           COMPUTE HIGH-S-TOTAL ROUNDED =                               04947000
+             HIGH-S-TOTAL + TEMP-SHR-AMT.                               04948000
+                                                                        04960000
+           READ TEMP-FILE                                               04970000
+             AT END MOVE 'Y' TO EOF-FLAG                                04980000
+           END-READ.                                                    04990000
+                                                                        05000000
+       3000-EXIT. EXIT.                                                 05010000
+                                                                        05020000
+      ****************************************************************  05020100
+      * 3100-PRINT-HEADER-2 THIS ROUTINE PROCESS PAGE NUMBER FOR     *  05020200
+      * REPORT 2 AND MOVE IT TO FORMATTED OUTPUT FIELD. IT ALSO PRINT*  05020300
+      * THE APPROPRIATE HEADERS AND COLUMNS HEADERS FOR REP 2.       *  05020400
+      ****************************************************************  05020500
+                                                                        05020600
+       3100-PRINT-HEADER-2.                                             05021000
+                                                                        05022000
+           ADD 1 TO PAGE-COUNT.                                         05022100
+                                                                        05022200
+           MOVE PAGE-COUNT TO O-PAGE-COUNT.                             05022300
+                                                                        05022400
+           WRITE PRINT-RECORD FROM HEADER-1 AFTER PAGE.                 05023000
+           WRITE PRINT-RECORD FROM REP-2-HDR AFTER 1.                   05023100
+           WRITE PRINT-RECORD FROM COLUMN-HDR-2 AFTER 2.                05024000
+           WRITE PRINT-RECORD FROM HYPHEN-HDR-REP-2 AFTER 2.            05024100
+                                                                        05024200
+           MOVE 0 TO LINE-COUNT.                                        05024300
+                                                                        05024400
+       3100-EXIT. EXIT.                                                 05025000
+                                                                        05026000
+      ***************************************************************** 05027000
+      * 4000-HIGH-SALES-TOTALS THIS ROUTINE MOVES NUMBER OF HIGH SHARE* 05028000
+      * SOLD RECORDS AND THE ACCUMULATED RUNNING HIGH SHARE SOLD TOTAL* 05029000
+      * TO FORMATTED OUTPUT FIELDS, PRINT THEM TO OUTPUT. IT ALSO     * 05029100
+      * PRINTS APPROPRIATE HEADERS, COLUMN HEADERS OF REPORT 2 PART 2.* 05029300
+      ***************************************************************** 05029400
+                                                                        05029500
+       4000-HIGH-SALES-TOTALS.                                          05030000
+                                                                        05031000
+           ADD 1 TO PAGE-COUNT.                                         05031100
+           MOVE PAGE-COUNT TO O-PAGE-COUNT.                             05031200
+                                                                        05031300
+           WRITE PRINT-RECORD FROM HEADER-1 AFTER PAGE.                 05032000
+           WRITE PRINT-RECORD FROM HEADER-PART-2-2 AFTER 2.             05032100
+           WRITE PRINT-RECORD FROM COLUMN-HDR-2-2 AFTER 2.              05032200
+           WRITE PRINT-RECORD FROM HYPHEN-HDR-PART-2-2 AFTER 2.         05032300
+                                                                        05033000
+           MOVE HIGH-SHR-COUNT TO O-HIGH-SHR-COUNT.                     05036000
+           MOVE HIGH-S-TOTAL TO O-HIGH-SHR-TOTAL.                       05037000
+                                                                        05037100
+           WRITE PRINT-RECORD FROM O-HIGH-SHR-SOLD AFTER 2.             05038000
+                                                                        05039000
+       4000-EXIT. EXIT.                                                 05050000
+                                                                        05060000
+/*                                                                      05070000
+//SYSLIN   DD DSN=&&OBJMOD,                                             05080000
+//            SPACE=(CYL,(1,1)),                                        05090000
+//            DISP=(MOD,PASS)                                           05100000
+//*                                                                     05110000
+//SYSPRINT DD SYSOUT=*                                                  05120000
+//*                                                                     05130000
+//SYSUT1   DD SPACE=(3040,(40,40),,,ROUND)                              05140000
+//SYSUT2   DD SPACE=(3040,(40,40),,,ROUND)                              05150000
+//SYSUT3   DD SPACE=(3040,(40,40),,,ROUND)                              05160000
+//SYSUT4   DD SPACE=(3040,(40,40),,,ROUND)                              05170000
+//SYSUT5   DD SPACE=(3040,(40,40),,,ROUND)                              05180000
+//SYSUT6   DD SPACE=(3040,(40,40),,,ROUND)                              05190000
+//SYSUT7   DD SPACE=(3040,(40,40),,,ROUND)                              05200000
+//SYSUT8   DD SPACE=(3040,(40,40),,,ROUND)                              05210000
+//SYSUT9   DD SPACE=(3040,(40,40),,,ROUND)                              05220000
+//SYSUT10  DD SPACE=(3040,(40,40),,,ROUND)                              05230000
+//SYSUT11  DD SPACE=(3040,(40,40),,,ROUND)                              05240000
+//SYSUT12  DD SPACE=(3040,(40,40),,,ROUND)                              05250000
+//SYSUT13  DD SPACE=(3040,(40,40),,,ROUND)                              05260000
+//SYSUT14  DD SPACE=(3040,(40,40),,,ROUND)                              05270000
+//SYSUT15  DD SPACE=(3040,(40,40),,,ROUND)                              05280000
+//SYSMDECK DD SPACE=(CYL,(1,1))                                         05290000
+//*                                                                     05300000
+//***********************************************************           05310000
+//*                                                         *           05320000
+//* JSTEP02 CALLS THE BINDER OR LOAD MODULE TO BIND THE     *           05330000
+//* OBJECT MODULE TO CREATE AN EXECUTABLE PROGRAM OBJECT    *           05340000
+//* OF THE COBOL PROGRAM.                                   *           05350000
+//*                                                         *           05360000
+//* DDNAME                 FILE DESCRIPTION                 *           05370000
+//*                                                         *           05380000
+//* SYSLIB   INPUT:  OBJECT MODULE FOR COBOL                *           05390000
+//* SYSLIN   INPUT:  TEMPORARY OBJECT MODULE REFERENCED IN  *           05400000
+//*                  JSTEP01                                *           05410000
+//* SYSLMOD  INPUT:  THE PROGRAM OBJECT CREATED BY THE      *           05420000
+//*                  BINDER AND STORED IN A PDSE            *           05430000
+//* SYSPRINT OUTPUT: MESSAGES FROM THE BINDER               *           05440000
+//*                                                         *           05450000
+//***********************************************************           05460000
+//*                                                                     05470000
+//JSTEP02  EXEC PGM=HEWL,COND=(0,LT)                                    05480000
+//*                                                                     05490000
+//SYSLIB   DD DSN=CEE.SCEELKED,                                         05500000
+//            DISP=SHR                                                  05510000
+//*                                                                     05520000
+//SYSLIN   DD DSN=&&OBJMOD,                                             05530000
+//            DISP=(OLD,DELETE,DELETE)                                  05540000
+//*                                                                     05550000
+//SYSLMOD  DD DSN=KC03GC1.CSCI465.LOADLIB(ASSIGN5),                     05560000
+//            SPACE=(1024,(50,20,1)),                                   05570000
+//            DSNTYPE=LIBRARY,                                          05580000
+//            DISP=(MOD,KEEP,KEEP)                                      05590000
+//*                                                                     05600000
+//SYSPRINT DD SYSOUT=*                                                  05610000
+//*                                                                     05620000
+//***********************************************************           05630000
+//*                                                         *           05640000
+//* JSTEP03 FETCHES AND EXECUTES THE OBJECT MODULE FROM THE *           05650000
+//* THE BINDER AND PRINTS TO STANDARD OUTPUT                *           05660000
+//*                                                         *           05670000
+//* DD NAME                  FILE DESCRIPTION               *           05680000
+//*                                                         *           05690000
+//* STEPLIB  INPUT:  LOCATION OF THE LOAD LIBRARY PDSE      *           05700000
+//* COBIN4   INPUT: THE NAME AND LOCATION OF THE INPUT FILE *           05710000
+//* COBOUT4  OUTPUT: THE OUTPUT OF THE PROGRAM AFTER        *           05720000
+//*                  EXECUTION PRINTED TO SCREEN            *           05730000
+//* TEMPFLE  OUTPUT: TEMPORARY FILE THAT HOLD THE HIGH      *           05731000
+//*                  SHARE RECORDS, THE DEPOSITORES NAME.   *           05732000
+//*                                                         *           05733000
+//* SYSUDUMP OUTPUT: DIAGNOSTIC MESSAGSES IF THE PROGRAM    *           05740000
+//*                  ABENDS                                 *           05750000
+//*                                                         *           05760000
+//***********************************************************           05770000
+//*                                                                     05780000
+//JSTEP03  EXEC PGM=ASSIGN5,COND=(0,LT)                                 05790000
+//*                                                                     05800000
+//STEPLIB  DD DSN=KC03GC1.CSCI465.LOADLIB,                              05810000
+//            DISP=SHR                                                  05820000
+//*                                                                     05830000
+//COBIN4   DD DSN=KC02322.CSCI465.DATAFA17(DATA5),                      05840000
+//            DISP=SHR                                                  05850000
+//*                                                                     05860000
+//COBOUT4  DD SYSOUT=*                                                  05870000
+//*                                                                     05880000
+//TEMPFLE  DD SPACE=(TRK,(1,1))                                         05890000
+//*                                                                     05900000
+//SYSUDUMP DD SYSOUT=*                                                  05910000
+//                                                                      05920000
